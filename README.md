@@ -189,31 +189,54 @@ docker compose -p kitchenpos up -d
 ## 모델링
 
 ### 상품
+
+#### 속성
 - `Product` 는 식별자, `ProductName`, `ProductPrice` 을 가진다.
 
+
+
 ### 메뉴 그룹
+
+#### 속성
 - `MenuGroup` 은 식별자, `MenuGroupName` 을 가진다.
 
+
+
 ### 메뉴
+
+#### 속성
 - `Menu` 는 식별자, `MenuName`, `MenuPrice`, `MenuGroup`, `MenuDisplayStatus`, `MenuProducts` 를 가진다.
-- `Menu`에서 `MenuProducts`를 생성한다.
-- `Menu`에서 `MenuDisplayStatus` 를 변경한다.
-- `Menu`에서 `MenuProduct` 가격의 총 `Price`을 계산한다.
 - `MenuProduct` 는 `Product`, `Quantity` 을 가진다.
 - `MenuProduct` 에서 `Product` 의 총 `Price` 을 계산한다.
 
+#### 행위
+- `Menu`에서 `MenuProducts`를 생성한다.
+- `Menu`에서 `MenuDisplayStatus` 를 변경한다.
+- `Menu`에서 `MenuProduct` 가격의 총 `Price`을 계산한다.
+
+
 
 ### 주문 테이블
+
+#### 속성
 - `OrderTable` 은 식별자, `OrderTableName`, `NumberOfGuests`, `Occupied` 를 가진다.
+
+#### 행위
 - `OrderTable` 에서 `Occupied`를 변경한다.
 
+
+
 ### 배달 주문
+#### 속성
 - `Order` 는 `OrderType` 중 `DELIVERY_ORDER` 를 가진다.
 - `Order` 는 식별자, `OrderStatus`, 주문 일시, `DeliveryAddress`, `OrderLineItems` 을 가진다.
-- `Order` 에서 `OrderLineItems` 를 생성한다.
-- `OrderLineItems`은 선택한 `Menu`와 `Quantity`과 총 `Price`을 가진다.
-- `Order` 에서 `OrderStatus` 를 변경한다.
 - `OrderStatus` 는 `Waiting` → `Accepted` → `Served` → `Delivering` → `Delivered` → `Completed` 를 가진다.
+- `OrderLineItems`은 선택한 `Menu`와 `Quantity`과 총 `Price`을 가진다.
+
+#### 행위 
+- `Order` 에서 `OrderLineItems` 를 생성한다.
+- `Order` 에서 `OrderStatus` 를 변경한다.
+
   ```mermaid
   ---
   title: OrderStatus
@@ -226,13 +249,20 @@ docker compose -p kitchenpos up -d
     G --> H[Completed]
   ```
 
+
+
 ### 포장 주문
+
+#### 속성
 - `Order` 는 `OrderType` 중 `TAKEOUT` 를 가진다.
 - `Order` 는 식별자, `OrderStatus`, 주문 일시, `OrderLineItems` 을 가진다.
-- `Order` 에서 `OrderLineItems` 를 생성한다.
-- `OrderLineItems`은 선택한 `Menu`와 `Quantity` 과 총 `Price` 을 가진다.
-- `Order` 에서 `OrderStatus` 를 변경한다.
 - `OrderStatus` 는 `Waiting` → `Accepted` → `Served` → `Completed` 를 가진다.
+- `OrderLineItems`은 선택한 `Menu`와 `Quantity` 과 총 `Price` 을 가진다.
+
+#### 행위
+- `Order` 에서 `OrderLineItems` 를 생성한다.
+- `Order` 에서 `OrderStatus` 를 변경한다.
+
   ```mermaid
   ---
   title: OrderStatus
@@ -243,13 +273,19 @@ docker compose -p kitchenpos up -d
     E --> H[Completed]
   ```
 
+
+
 ### 매장 주문
+
+#### 속성
 - `Order` 는 `OrderType` 중 `EAT_IN` 를 가진다.
 - `Order` 는 식별자, `OrderStatus`, 주문 일시, `OrderLineItems`, `OrderTable`을 가진다.
-- `Order` 에서 `OrderLineItems` 를 생성한다.
-- `OrderLineItems`은 선택한 `Menu`와 `Quantity` 과 총 `Price` 을 가진다.
-- `Order` 에서 `OrderStatus` 를 변경한다.
 - `OrderStatus` 는 `Waiting` → `Accepted` → `Served` →  `Completed` 를 가진다.
+- `OrderLineItems`은 선택한 `Menu`와 `Quantity` 과 총 `Price` 을 가진다.
+
+#### 행위
+- `Order` 에서 `OrderLineItems` 를 생성한다.
+- `Order` 에서 `OrderStatus` 를 변경한다.
   ```mermaid
   ---
   title: OrderStatus
