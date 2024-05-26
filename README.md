@@ -193,6 +193,10 @@ docker compose -p kitchenpos up -d
 #### 속성
 - `Product` 는 식별자, `ProductName`, `ProductPrice` 을 가진다.
 
+#### 행위
+- `Product`에서 `ProductPrice`를 변경한다.
+
+
 
 
 ### 메뉴 그룹
@@ -211,6 +215,7 @@ docker compose -p kitchenpos up -d
 
 #### 행위
 - `Menu`에서 `MenuProducts`를 생성한다.
+- `Menu`에서 `MenuPrice`를 변경한다. 
 - `Menu`에서 `MenuDisplayStatus` 를 변경한다.
 - `Menu`에서 `MenuProduct` 가격의 총 `Price`을 계산한다.
 
@@ -223,6 +228,7 @@ docker compose -p kitchenpos up -d
 
 #### 행위
 - `OrderTable` 에서 `Occupied`를 변경한다.
+- `OrderTable` 에서 `NumberOfGuests`를 변경한다.
 
 
 
