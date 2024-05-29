@@ -194,15 +194,26 @@ docker compose -p kitchenpos up -d
 - `Product` 는 식별자, `ProductName`, `ProductPrice` 을 가진다.
 
 #### 행위
-- `Product`에서 `ProductPrice`를 변경한다.
+- `Product`를 등록할 수 있다.
+  - `ProductPrice`가 올바르지 않으면 등록할 수 없다.
+  - `ProductPrice`는 0원 이상이어야 한다.
+  - `ProductName`가 올바르지 않으면 등록할 수 없다. 
+  - `ProductName`에는 비속어가 포함될 수 없다.
+- `Product`에서 `ProductPrice`를 변경할 수 있다.
+  - `ProductPrice`가 올바르지 않으면 변경할 수 없다. 
+  - `ProductPrice`는 0원 이상이어야 한다.  
 
-
-
+  
 
 ### 메뉴 그룹
 
 #### 속성
 - `MenuGroup` 은 식별자, `MenuGroupName` 을 가진다.
+
+#### 행위 
+- `MenuGroup`을 등록할 수 있다. 
+  - `MenuGroupName`이 올바르지 않으면 등록할 수 없다.
+  - `MenuGroupName`은 존재해야 한다.
 
 
 
@@ -214,9 +225,22 @@ docker compose -p kitchenpos up -d
 - `MenuProduct` 에서 `Product` 의 총 `Price` 을 계산한다.
 
 #### 행위
+- `MenuProducts`의 `Quantity`는 0 이상이어야 한다.
 - `Menu`에서 `MenuProducts`를 생성한다.
-- `Menu`에서 `MenuPrice`를 변경한다. 
-- `Menu`에서 `MenuDisplayStatus` 를 변경한다.
+- `Menu`를 등록할 수 있다.
+  - `MenuGroup`이 없으면 등록할 수 없다.
+  - `MenuProducts`가 없으면 등록할 수 없다.
+  - `MenuName`이 올바르지 않으면 등록할 수 없다. 
+    - `MenuName`에는 비속어가 포함될 수 없다. 
+  - `MenuPrice`가 올바르지 않으면 등록할 수 없다. 
+    - `MenuPrice`는 0원 이상이어야 한다. 
+    - `MenuPrice`는 `MenuProducts`의 총합보다 작거나 같아야 한다. 
+- `Menu`에서 `MenuPrice`를 변경할 수 있다. 
+  - `MenuPrice`가 올바르지 않으면 변경할 수 없다.
+    - `MenuPrice`는 0원 이상이어야 한다.
+  - `MenuPrice`는 `MenuProducts`의 총합보다 작거나 같아야 한다.
+- `Menu`에서 `MenuDisplayStatus` 를 변경할 수 있다.
+  - `MenuPrice`가 `MenuProducts`의 총합보다 클 경우 `DisplayedMenu`가 될 수 없다.
 - `Menu`에서 `MenuProduct` 가격의 총 `Price`을 계산한다.
 
 
@@ -227,47 +251,68 @@ docker compose -p kitchenpos up -d
 - `OrderTable` 은 식별자, `OrderTableName`, `NumberOfGuests`, `Occupied` 를 가진다.
 
 #### 행위
-- `OrderTable` 에서 `Occupied`를 변경한다.
-- `OrderTable` 에서 `NumberOfGuests`를 변경한다.
+- `OrderTable`를 등록할 수 있다. 
+  - `OrderTableName`이 존재하지 않으면 등록할 수 없다.
+- `OrderTable` 에서 `Occupied`를 변경할 수 있다.
+  - `OrderTabe`을 사용하는 `EatInOrder`가 있을 경우 `ClearedTable` 상태로 변경할 수 없다. 
+- `OrderTable` 에서 `NumberOfGuests`를 변경할 수 있다.
+  - `NumberOfGuest`가 0 미만이면 변경할 수 없다.
+  - `ClearedTable`은 `NumberOfGuests`를 변경할 수 없다.
+
 
 
 
 ### 배달 주문
 #### 속성
-- `Order` 는 `OrderType` 중 `DELIVERY_ORDER` 를 가진다.
-- `Order` 는 식별자, `OrderStatus`, 주문 일시, `DeliveryAddress`, `OrderLineItems` 을 가진다.
-- `OrderStatus` 는 `Waiting` → `Accepted` → `Served` → `Delivering` → `Delivered` → `Completed` 를 가진다.
+- `DeliveryOrder` 는 `OrderType` 중 `DELIVERY_ORDER` 를 가진다.
+- `DeliveryOrder` 는 식별자, `DeliveryOrderStatus`, 주문 일시, `DeliveryAddress`, `OrderLineItems` 을 가진다.
 - `OrderLineItems`은 선택한 `Menu`와 `Quantity`과 총 `Price`을 가진다.
 
 #### 행위 
-- `Order` 에서 `OrderLineItems` 를 생성한다.
-- `Order` 에서 `OrderStatus` 를 변경한다.
-
-  ```mermaid
-  ---
-  title: OrderStatus
-  ---
-  flowchart LR
-    A[Waiting] --> D(Accepted)
-    D --> E(Served)
-    E --> F(Delivering)
-    F --> G(Delivered)
-    G --> H[Completed]
-  ```
-
-
+- `DeliveryOrder` 에서 `OrderLineItems` 를 생성한다.
+  - `OrderLineItems`는 `Menu`가 존재하지 않으면 생성할 수 없다. 
+  - `OrderLineItems`의 `Menu`가 `DisplayedMenu`가 아니면 생성할 수 없다.
+  - `OrderLineItems`는 `Quantity`가 0 미만이면 생성할 수 없다. 
+  - `DeliveryOrder`는 1개 이상의 `OrderLineItems`가 존재하지 않으면 등록할 수 없다.
+  - `DeliveryOrder`는 `DeliveryAddress`가 존재하지 않으면 등록할 수 없다.
+- `DeliveryOrder` 에서 `DeliveryOrderStatus` 를 `Waiting`로 변경할 수 있다.
+- `DeliveryOrder` 에서 `DeliveryOrderStatus` 를 `Accepted`로 변경할 수 있다.
+  - 변경 시 배달 대행사를 호출한다.
+- `DeliveryOrder` 에서 `DeliveryOrderStatus` 를 `Served`로 변경할 수 있다.
+- `DeliveryOrder` 에서 `DeliveryOrderStatus` 를 `Delivering`로 변경할 수 있다.
+- `DeliveryOrder` 에서 `DeliveryOrderStatus` 를 `Delivered`로 변경할 수 있다.
+- `DeliveryOrder` 에서 `DeliveryOrderStatus` 를 `Completed`로 변경할 수 있다.
+- `DeliveryOrder` 에서 `DeliveryOrderStatus` 변경 시 순차적이어야 한다.
+    ```mermaid
+    ---
+    title: OrderStatus
+    ---
+    flowchart LR
+      A[Waiting] --> D(Accepted)
+      D --> E(Served)
+      E --> F(Delivering)
+      F --> G(Delivered)
+      G --> H[Completed]
+    ```
 
 ### 포장 주문
 
 #### 속성
-- `Order` 는 `OrderType` 중 `TAKEOUT` 를 가진다.
-- `Order` 는 식별자, `OrderStatus`, 주문 일시, `OrderLineItems` 을 가진다.
-- `OrderStatus` 는 `Waiting` → `Accepted` → `Served` → `Completed` 를 가진다.
+- `TakeoutOrder` 는 `OrderType` 중 `TAKEOUT` 를 가진다.
+- `TakeoutOrder` 는 식별자, `TakeoutOrderStatus`, 주문 일시, `OrderLineItems` 을 가진다.
 - `OrderLineItems`은 선택한 `Menu`와 `Quantity` 과 총 `Price` 을 가진다.
 
 #### 행위
-- `Order` 에서 `OrderLineItems` 를 생성한다.
-- `Order` 에서 `OrderStatus` 를 변경한다.
+- `TakeoutOrder` 에서 `OrderLineItems` 를 생성한다.
+  - `OrderLineItems`는 `Menu`가 존재하지 않으면 생성할 수 없다.
+  - `OrderLineItems`의 `Menu`가 `DisplayedMenu`가 아니면 생성할 수 없다.
+  - `OrderLineItems`는 `Quantity`가 0 미만이면 생성할 수 없다.
+  - `TakeoutOrder`는 1개 이상의 `OrderLineItems`가 존재하지 않으면 등록할 수 없다.
+- `TakeoutOrder` 에서 `TakeoutOrderStatus` 를 `Waiting`로 변경할 수 있다.
+- `TakeoutOrder` 에서 `TakeoutOrderStatus` 를 `Accepted`로 변경할 수 있다.
+- `TakeoutOrder` 에서 `TakeoutOrderStatus` 를 `Served`로 변경할 수 있다.
+- `TakeoutOrder` 에서 `TakeoutOrderStatus` 를 `Completed`로 변경할 수 있다.
+- `TakeoutOrder` 에서 `TakeoutOrderStatus` 변경 시 순차적이어야 한다.
 
   ```mermaid
   ---
@@ -278,20 +323,27 @@ docker compose -p kitchenpos up -d
     D --> E(Served)
     E --> H[Completed]
   ```
-
 
 
 ### 매장 주문
 
 #### 속성
-- `Order` 는 `OrderType` 중 `EAT_IN` 를 가진다.
-- `Order` 는 식별자, `OrderStatus`, 주문 일시, `OrderLineItems`, `OrderTable`을 가진다.
-- `OrderStatus` 는 `Waiting` → `Accepted` → `Served` →  `Completed` 를 가진다.
+- `EatInOrder` 는 `OrderType` 중 `EAT_IN` 를 가진다.
+- `EatInOrder` 는 식별자, `EatInOrderStatus`, 주문 일시, `OrderLineItems`, `OrderTable`을 가진다.
 - `OrderLineItems`은 선택한 `Menu`와 `Quantity` 과 총 `Price` 을 가진다.
 
 #### 행위
-- `Order` 에서 `OrderLineItems` 를 생성한다.
-- `Order` 에서 `OrderStatus` 를 변경한다.
+- `EatInOrder` 에서 `OrderLineItems` 를 생성한다.
+  - `OrderLineItems`는 `Menu`가 존재하지 않으면 생성할 수 없다.
+  - `OrderLineItems`의 `Menu`가 `DisplayedMenu`가 아니면 생성할 수 없다.
+  - `EatInOrder`는 1개 이상의 `OrderLineItems`가 존재하지 않으면 등록할 수 없다.
+  - `EatInOrder`는 `OrderTable`이 `ClearedTable` 상태가 아니면 등록할 수 없다.
+- `EatInOrder` 에서 `EatInOrderStatus` 를 `Waiting`로 변경할 수 있다.
+- `EatInOrder` 에서 `EatInOrderStatus` 를 `Accepted`로 변경할 수 있다.
+- `EatInOrder` 에서 `EatInOrderStatus` 를 `Served`로 변경할 수 있다.
+- `EatInOrder` 에서 `EatInOrderStatus` 를 `Completed`로 변경할 수 있다.
+  - `OrderTable`에게 `EatInOrderStatus`가 `Completed` 되었음을 알린다. 
+- `EatInOrder` 에서 `EatInOrderStatus` 변경 시 순차적이어야 한다.
   ```mermaid
   ---
   title: OrderStatus
@@ -301,11 +353,3 @@ docker compose -p kitchenpos up -d
     D --> E(Served)
     E --> H[Completed]
   ```
-
-### 기타
-#### 주문 등록 정책
-- `배달 주문`: `메뉴`가 `노출된 메뉴`이고 `배달 주소`가 있어야 하며, `메뉴`가 0개 이상이어야 등록이 가능하다.
-- `매장 주문`: `메뉴`가 `노출된 메뉴`이고 `주문 테이블`이 있어야 등록이 가능하다.
-- `포장 주문`: `메뉴`가 `노출된 메뉴`이고 `메뉴`가 0개 이상이어야 등록이 가능하다.
-#### 주문상태 변경 정책
-- `주문`의 유형별로 정의된 `주문상태`의 순서대로만 변경이 가능하다.
